@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException; 
+use GuzzleHttp\Exception\ServerException; 
+use Exception; 
 
 class LocationController extends Controller
 {
@@ -11,6 +14,7 @@ class LocationController extends Controller
     {
         // Handle GET request with address in the URL path (/api/geocode/{address})
         if ($request->isMethod('get') && $address) {
+            // $address is already set
         }
         // Handle GET request with address as a query parameter (/api/geocode?address=...)
         elseif ($request->isMethod('get')) {
@@ -25,8 +29,7 @@ class LocationController extends Controller
                 'address' => 'required|string',
             ]);
             $address = $request->input('address');
-        }
-        else {
+        } else {
             return response()->json(['error' => 'Invalid request method'], 405);
         }
 
@@ -37,7 +40,7 @@ class LocationController extends Controller
 
         try {
             // Make the API request to LocationIQ
-            $response = $client->request('GET', $url, [
+            $response = $client->request('GET', $url, [ 
                 'query' => [
                     'key' => $apiKey,
                     'q' => $address,
@@ -45,7 +48,7 @@ class LocationController extends Controller
                 ],
             ]);
 
-            // Decode the JSON response
+            
             $data = json_decode($response->getBody(), true);
 
             // Check if data is not empty and return the result
@@ -53,23 +56,25 @@ class LocationController extends Controller
                 $result = [
                     'latitude' => $data[0]['lat'],
                     'longitude' => $data[0]['lon'],
-                    'display_name' => $data[0]['display_name']
+                    'display_name' => $data[0]['display_name'],
                 ];
                 return response()->json($result);
             } else {
                 return response()->json(['error' => 'No results found'], 404);
             }
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
-            // Handle client errors (4xx)
-            return response()->json(['error' => 'Client error', 'details' => $e->getMessage()], $e->getCode());
-        } catch (\GuzzleHttp\Exception\ServerException $e) {
-            // Handle server errors (5xx)
-            return response()->json(['error' => 'Server error', 'details' => $e->getMessage()], $e->getCode());
-        } catch (\Exception $e) {
+        } catch (ClientException $e) {
+            // Handle client errors 
+            $responseBody = $e->getResponse()->getBody(true); 
+            $errorData = json_decode($responseBody, true) ?? ['message' => $responseBody->getContents()]; 
+            return response()->json(['error' => 'Client error', 'details' => $errorData], $e->getCode());
+        } catch (ServerException $e) {
+            // Handle server errors
+             $responseBody = $e->getResponse()->getBody(true);
+             $errorData = json_decode($responseBody, true) ?? ['message' => $responseBody->getContents()];
+            return response()->json(['error' => 'Server error', 'details' => $errorData], $e->getCode());
+        } catch (Exception $e) {
             // Handle any other exceptions
             return response()->json(['error' => 'Failed to connect to LocationIQ API', 'details' => $e->getMessage()], 500);
         }
     }
-
 }
-//ANYTHING ABOVE HERE DI HILABTAN except lang anang 'use' kay mag add man gyud mo ana - XAN
