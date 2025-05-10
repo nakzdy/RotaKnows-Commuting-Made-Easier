@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\WeatherController;
 
 // XANNNN
 Route::prefix('api')->group(function () {
@@ -11,4 +12,7 @@ Route::prefix('api')->group(function () {
 
     #News Route
     Route::get('/news/{country?}', [NewsController::class, 'index']);
+
+    //krylle weather
+    Route::get('/weather', [WeatherController::class, 'index']);
 });
