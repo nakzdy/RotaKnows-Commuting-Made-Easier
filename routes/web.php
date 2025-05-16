@@ -15,4 +15,5 @@ Route::prefix('api')->group(function () {
 
     //krylle weather
     Route::get('/weather', [WeatherController::class, 'index']);
+    Route::post('/weather', [WeatherController::class, 'index']);
 });

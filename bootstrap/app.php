@@ -12,10 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
-            'api/geocode', // Add your API endpoint here
+            'api/*', // All api
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
-//IBABAW ANI KAY XANDREA
