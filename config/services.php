@@ -35,4 +35,21 @@ return [
         ],
     ],
 
+    'gnews' => [
+        'api_key' => env('GNEWS_API_KEY'),
+        'base_url' => env('GNEWS_API_URL'),
+    ],
+
+    // Add LocationIQ config here:
+    'locationiq' => [
+        'api_key' => env('LOCATIONIQ_API_KEY'),
+        'base_url' => 'https://us1.locationiq.com/v1', 
+    ],
+
+    // Add OpenWeather config here:
+    'openweather' => [
+        'api_key' => env('OPENWEATHER_API_KEY'),
+        'base_url' => env('OPENWEATHER_API_URL', 'https://api.openweathermap.org/data/2.5/weather'),
+    ],
+
 ];

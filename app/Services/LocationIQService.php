@@ -11,16 +11,22 @@ class LocationIQService
 {
     protected $client;
     protected $apiKey;
+    protected $baseUrl;
 
     public function __construct()
     {
         $this->client = new Client();
-        $this->apiKey = env('LOCATIONIQ_API_KEY');
+        $this->apiKey = config('services.locationiq.api_key');    // load from config
+        $this->baseUrl = config('services.locationiq.base_url');  // load from config
+
+        if (empty($this->apiKey)) {
+            throw new Exception('LocationIQ API key is not set.');
+        }
     }
 
     public function geocode(string $address)
     {
-        $url = "https://us1.locationiq.com/v1/search.php";
+        $url = $this->baseUrl . '/search.php';
 
         try {
             $response = $this->client->request('GET', $url, [
@@ -40,7 +46,7 @@ class LocationIQService
                     'display_name' => $data[0]['display_name'],
                 ];
             } else {
-                return null; 
+                return null;
             }
         } catch (ClientException $e) {
             $responseBody = $e->getResponse()->getBody(true);
