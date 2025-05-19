@@ -5,6 +5,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\TomTomController;
+use App\Http\Controllers\GNewsController;
 
 // XANNNN
 Route::prefix('api')->group(function () {
@@ -12,9 +13,18 @@ Route::prefix('api')->group(function () {
     Route::post('/geocode', [LocationController::class, 'geocode']);
     Route::get('/geocode/{address}', [LocationController::class, 'geocode']);
 
-    //News Route
+    // News Route
     Route::get('/news/{country?}', [NewsController::class, 'index']);
 
-    //krylle weather
-    Route::get('/weather', [WeatherController::class, 'index']);                                                                                                                                                                  
+    // Krylle weather
+    Route::get('/weather', [WeatherController::class, 'index']);
+    Route::post('/weather', [WeatherController::class, 'index']);
+
+    // K news
+    Route::get('/gnews/{query?}', [GNewsController::class, 'search']);
+
+    // K calendar
+    Route::get('/calendar/auth', [CalendarController::class, 'redirectToGoogle']);
+    Route::get('/calendar/callback', [CalendarController::class, 'handleGoogleCallback']);
+    Route::get('/calendar/events', [CalendarController::class, 'listEvents']);
 });

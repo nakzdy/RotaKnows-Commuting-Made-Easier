@@ -12,9 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
-            'api/geocode', 
+            'api/*', // Allow all API routes
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        
+        // Exception handling
     })->create();
