@@ -3,307 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RotaKnows - USTP Commute Routes</title>
-  <meta name="description" content="Find the best commuting routes from USTP to malls around the city">
   <link rel="stylesheet" href="styles.css">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="script.js">
+  <title>RotaKnows</title>
 </head>
 <body>
-  <div class="app-container">
-    <!-- Header -->
-    <header class="header">
-      <div class="container header-container">
-        <div class="brand">
-          <div class="logo">
-            <div class="logo-circle"></div>
-            <svg viewBox="0 0 40 40" class="logo-svg">
-              <path
-                d="M 10,20 C 10,12 18,10 20,10 C 22,10 30,12 30,20 C 30,28 22,30 20,30 C 18,30 10,28 10,20"
-                fill="none"
-                stroke="white"
-                stroke-width="3"
-                stroke-linecap="round"
-              ></path>
-              <circle cx="20" cy="30" r="3" fill="white"></circle>
-            </svg>
-            <div class="logo-letter">R</div>
-          </div>
-          <div class="brand-text">
-            <h1>RotaKnows</h1>
-            <p class="tagline">Navigate with confidence</p>
-          </div>
-        </div>
-        
-        <div class="search-container">
-          <input type="text" class="search-input" placeholder="Search for a mall or route...">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-        </div>
-        
-        <nav class="main-nav">
-          <button class="nav-button">Home</button>
-          <button class="nav-button">Routes</button>
-          <button class="nav-button">About</button>
-        </nav>
-      </div>
-    </header>
+  <header>
+    <h1>RotaKnows</h1>
+    <div class="nav">
+      <button><a href="">Home</a></button>
+      <button><a href="">About</a></button>
+      <button><a href="">Contact</a></button>
+    </div>
+  </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Map Section -->
-      <div class="map-container">
-        <div class="map">
-          <!-- City grid simulation -->
-          <div class="grid-overlay"></div>
-          
-          <!-- Main roads -->
-          <div class="horizontal-road"></div>
-          <div class="vertical-road"></div>
-          
-          <!-- Locations -->
-          <div class="location ustp-location">
-            <svg class="pin-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            <span>USTP</span>
-          </div>
-          
-          <div class="location sm-location">
-            <svg class="pin-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            <span>SM Mall</span>
-          </div>
-          
-          <div class="location gaisano-location">
-            <svg class="pin-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            <span>Gaisano Mall</span>
-          </div>
-          
-          <div class="location centrio-location">
-            <svg class="pin-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-            <span>Centrio Mall</span>
-          </div>
-          
-          <!-- Routes -->
-          <svg class="routes-svg">
-            <path
-              id="route-sm"
-              d="M 25% 25% Q 40% 20%, 60% 20% T 75% 33%"
-              class="route route-sm"
-            ></path>
-            
-            <path
-              id="route-gaisano"
-              d="M 25% 25% Q 30% 50%, 40% 60% T 67% 75%"
-              class="route route-gaisano"
-            ></path>
-            
-            <path
-              id="route-centrio"
-              d="M 25% 25% Q 20% 40%, 25% 60% T 33% 67%"
-              class="route route-centrio"
-            ></path>
-          </svg>
-          
-          <!-- Map controls -->
-          <div class="map-controls">
-            <button class="map-control-button">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
-              </svg>
-            </button>
-            <button class="map-control-button">+</button>
-            <button class="map-control-button">-</button>
-          </div>
-          
-          <!-- Map attribution -->
-          <div class="map-attribution">
-            <div class="mini-logo">
-              <div class="mini-logo-circle"></div>
-              <div class="mini-logo-letter">R</div>
-            </div>
-            <span>RotaKnows © 2025</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <!-- Route Selector -->
-        <div class="route-selector">
-          <h2>Select Destination</h2>
-          
-          <div class="tabs">
-            <div class="tabs-list">
-              <button class="tab-button active" data-tab="sm">SM Mall</button>
-              <button class="tab-button" data-tab="gaisano">Gaisano</button>
-              <button class="tab-button" data-tab="centrio">Centrio</button>
-            </div>
-            
-            <div class="tab-content active" id="tab-sm">
-              <div class="route-card route-card-primary">
-                <div class="route-card-header">
-                  <svg class="bus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 17h2v-5a8 8 0 0 0-16 0v5h2"></path>
-                    <path d="M9 17h6"></path>
-                    <path d="M3 17h2"></path>
-                    <path d="M13 5a4 4 0 0 0-8 0"></path>
-                  </svg>
-                  <span>Route 01: USTP to SM Mall</span>
-                </div>
-                <div class="route-card-body">Via C.M. Recto Avenue, direct route</div>
-              </div>
-              
-              <div class="route-card route-card-secondary">
-                <div class="route-card-header">
-                  <svg class="bus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 17h2v-5a8 8 0 0 0-16 0v5h2"></path>
-                    <path d="M9 17h6"></path>
-                    <path d="M3 17h2"></path>
-                    <path d="M13 5a4 4 0 0 0-8 0"></path>
-                  </svg>
-                  <span>Route 05: USTP to SM Mall</span>
-                </div>
-                <div class="route-card-body">Via Divisoria, longer but less traffic</div>
-              </div>
-            </div>
-            
-            <div class="tab-content" id="tab-gaisano">
-              <div class="route-card route-card-primary gaisano-card">
-                <div class="route-card-header">
-                  <svg class="bus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 17h2v-5a8 8 0 0 0-16 0v5h2"></path>
-                    <path d="M9 17h6"></path>
-                    <path d="M3 17h2"></path>
-                    <path d="M13 5a4 4 0 0 0-8 0"></path>
-                  </svg>
-                  <span>Route 03: USTP to Gaisano</span>
-                </div>
-                <div class="route-card-body">Via Corrales Avenue, direct route</div>
-              </div>
-            </div>
-            
-            <div class="tab-content" id="tab-centrio">
-              <div class="route-card route-card-primary centrio-card">
-                <div class="route-card-header">
-                  <svg class="bus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 17h2v-5a8 8 0 0 0-16 0v5h2"></path>
-                    <path d="M9 17h6"></path>
-                    <path d="M3 17h2"></path>
-                    <path d="M13 5a4 4 0 0 0-8 0"></path>
-                  </svg>
-                  <span>Route 02: USTP to Centrio</span>
-                </div>
-                <div class="route-card-body">Via Velez Street, fastest route</div>
-              </div>
-              
-              <div class="route-card route-card-secondary centrio-card">
-                <div class="route-card-header">
-                  <svg class="bus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 17h2v-5a8 8 0 0 0-16 0v5h2"></path>
-                    <path d="M9 17h6"></path>
-                    <path d="M3 17h2"></path>
-                    <path d="M13 5a4 4 0 0 0-8 0"></path>
-                  </svg>
-                  <span>Route 04: USTP to Centrio</span>
-                </div>
-                <div class="route-card-body">Via Capistrano Street, less crowded</div>
-              </div>
-            </div>
-          </div>
-          
-          <button class="view-route-button">View Selected Route</button>
-        </div>
-        
-        <!-- Info Panel -->
-        <div class="info-panel">
-          <h2>Route Information</h2>
-          
-          <div class="info-card">
-            <div class="info-card-header">
-              <h3>Route 01: USTP to SM Mall</h3>
-              <p>Via C.M. Recto Avenue</p>
-            </div>
-            <div class="info-card-content">
-              <div class="info-item">
-                <svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <span>Travel Time: 15-20 minutes</span>
-              </div>
-              <div class="info-item">
-                <svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="1" x2="12" y2="23"></line>
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                </svg>
-                <span>Fare: ₱12.00 - ₱15.00</span>
-              </div>
-              <div class="info-item">
-                <svg class="info-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-                <span>Vehicle Type: Jeepney</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="separator"></div>
-          
-          <div class="stops-section">
-            <h3>Stops Along the Way</h3>
-            <ol class="stops-list">
-              <li>
-                <div class="stop-name">USTP Main Gate</div>
-                <div class="stop-desc">Starting point</div>
-              </li>
-              <li>
-                <div class="stop-name">C.M. Recto Avenue</div>
-                <div class="stop-desc">Major road with multiple jeepney stops</div>
-              </li>
-              <li>
-                <div class="stop-name">Limketkai Center</div>
-                <div class="stop-desc">Commercial complex</div>
-              </li>
-              <li>
-                <div class="stop-name">SM City CDO</div>
-                <div class="stop-desc">Final destination</div>
-              </li>
-            </ol>
-          </div>
-          
-          <div class="separator"></div>
-          
-          <div class="hours-section">
-            <h3>Operating Hours</h3>
-            <div class="hours-grid">
-              <div>Monday - Friday:</div>
-              <div>5:00 AM - 9:00 PM</div>
-              <div>Saturday:</div>
-              <div>6:00 AM - 9:00 PM</div>
-              <div>Sunday:</div>
-              <div>7:00 AM - 8:00 PM</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
+  <main>
+    <section id="home">
+      <h2>Welcome to RotaKnows</h2>
+      <p>Your one-stop solution for managing your rota efficiently.</p>
+    </section>
 
-  <script src="script.js"></script>
+    <section id="about">
+      <h2>About Us</h2>
+      <p>We provide tools to help you manage your work schedule effectively.</p>
+    </section>
+
+    <section id="contact">
+      <h2>Contact Us</h2>
+      <form action="#" method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="message">Message:</label>
+        <textarea id="message" name="message" required></textarea>
+
+        <button type="submit">Send Message</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2023 RotaKnows. All rights reserved.</p>
+  </footer>
 </body>
 </html>
