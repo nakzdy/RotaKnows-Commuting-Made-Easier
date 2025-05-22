@@ -52,4 +52,10 @@ return [
         'base_url' => env('OPENWEATHER_API_URL', 'https://api.openweathermap.org/data/2.5/weather'),
     ],
 
+    //TomTom
+    'tomtom' => [
+        'key' => env('TOMTOM_API_KEY'),
+        'base_url' => env('TOMTOM_BASE_URL', 'https://api.tomtom.com'),
+    ],
+
 ];

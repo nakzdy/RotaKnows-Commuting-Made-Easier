@@ -6,6 +6,7 @@ use App\Http\Controllers\WeatherController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\GNewsController;
 use App\Http\Controllers\Api\Auth\RegisterController;
+use App\Http\Controllers\MapController;
 use Illuminate\Http\Request; 
 
 // XANNNN
@@ -32,6 +33,10 @@ Route::prefix('api')->group(function () {
 
     //X user login
     Route::post('/register', RegisterController::class);
+
+    //X TomTom
+    Route::get('/tomtom/search', [MapController::class, 'searchPlaces'])->name('tomtom.search');
+    Route::get('/tomtom/route', [MapController::class, 'getRoute'])->name('tomtom.route');
 
     Route::middleware('auth:sanctum')->group(function () {
         // Get authenticated user's details
