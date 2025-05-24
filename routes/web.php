@@ -8,7 +8,7 @@ use App\Http\Controllers\GNewsController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\MapController;
-use App\Http\Controllers\LocationFareController; // Keep this
+use App\Http\Controllers\LocationFareController; 
 use Illuminate\Http\Request;
 
 // XANNNN
@@ -35,24 +35,15 @@ Route::prefix('api')->group(function () {
     Route::get('/tomtom/search', [MapController::class, 'searchPlaces'])->name('tomtom.search');
     Route::get('/tomtom/route', [MapController::class, 'getRoute'])->name('tomtom.route');
 
-    // Combined API for ad-hoc Fare and Info Calculation (No database persistence)
+    // Combined API for ad-hoc Fare and Info Calculation 
     Route::get('/fare-info', [LocationFareController::class, 'getFareAndInfo']);
     Route::post('/calculate-fare', [LocationFareController::class, 'calculateFare']);
 
-    // --- NEW ROUTES FOR PUT/PATCH/DELETE WITH ORIGIN/DESTINATION IN BODY ---
-
-    // Route for "updating" a fare calculation.
-    // This expects origin_address and destination_address in the request body.
-    // Example URL: PUT http://localhost:8000/api/fare-update
     Route::put('/fare-update', [LocationFareController::class, 'updateFare']);
-    Route::patch('/fare-update', [LocationFareController::class, 'updateFare']); // Often uses same method
+    Route::patch('/fare-update', [LocationFareController::class, 'updateFare']); 
 
-    // Route for "deleting" or "resetting" a fare calculation.
-    // This expects origin_address and destination_address in the request body.
-    // Example URL: DELETE http://localhost:8000/api/fare-delete
     Route::delete('/fare-delete', [LocationFareController::class, 'deleteFare']);
 
-    // --- END NEW ROUTES ---
 
 
     // Routes requiring API authentication (using Sanctum middleware)
@@ -76,8 +67,5 @@ Route::prefix('api')->group(function () {
         // GET      /api/users/{user}     -> UserController@show    (Show a specific user by ID)
         // PUT/PATCH /api/users/{user}    -> UserController@update  (Update a specific user by ID)
         // DELETE   /api/users/{user}     -> UserController@destroy (Delete a specific user by ID)
-        // This POST '/register' might be merged into UserController@store if you wish to manage user creation
-        // through the resource route and require authentication for creating new users.
-        // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     });
 });

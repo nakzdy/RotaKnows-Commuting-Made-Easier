@@ -95,21 +95,17 @@ class LocationFareController extends Controller
         $request->validate([
             'origin_address' => 'required|string',
             'destination_address' => 'required|string',
-            'surcharge_amount' => 'numeric|min:0|nullable', // Example of a parameter you might "update"
-            'fare_modifier' => 'numeric|nullable', // Another example
+            'surcharge_amount' => 'numeric|min:0|nullable', // parameter you might "update"
+            'fare_modifier' => 'numeric|nullable', 
         ]);
 
         $originAddress = $request->input('origin_address');
         $destinationAddress = $request->input('destination_address');
         $surchargeAmount = $request->input('surcharge_amount', 0); // Default to 0 if not provided
 
-        // In a real scenario, you might:
-        // 1. Look up a stored trip based on origin/destination (if you had a DB of trips).
-        // 2. Apply the update (e.g., add surcharge to the expected fare).
-        // 3. Recalculate fare with new parameters or update stored parameters.
+        
 
-        // For this demonstration, we'll just acknowledge the request and show the data.
-        // We can even do a fresh calculation to show how changes *might* affect it.
+        
         try {
             $tripDetails = $this->fareCalculationService->calculateTripDetails(
                 $originAddress,
@@ -159,16 +155,13 @@ class LocationFareController extends Controller
         $originAddress = $request->input('origin_address');
         $destinationAddress = $request->input('destination_address');
 
-        // In a real scenario, you might:
-        // 1. Delete a specific trip record from the database based on origin/destination.
-        // 2. Clear a cache entry for a specific route.
+        
 
-        // For this demonstration, we'll just acknowledge the request.
         \Log::info("DELETE request received for fare calculation: Origin '{$originAddress}', Destination '{$destinationAddress}'");
 
         return response()->json([
             'message' => "Fare calculation for '{$originAddress}' to '{$destinationAddress}' conceptually deleted/reset.",
             'note' => 'This is a placeholder. No actual calculations or settings are deleted from persistence without a database or cache mechanism.'
-        ], 204); // 204 No Content - common for successful DELETE with no response body
+        ], 204); // 204 No Content 
     }
 }
