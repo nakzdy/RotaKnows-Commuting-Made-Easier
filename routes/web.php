@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\WeatherController;
-use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\PlacesController;
 use App\Http\Controllers\GNewsController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\UserController;
@@ -25,10 +25,8 @@ Route::prefix('api')->group(function () {
     // K news
     Route::get('/gnews/{query?}', [GNewsController::class, 'search']);
 
-    // K calendar
-    Route::get('/calendar/auth', [CalendarController::class, 'redirectToGoogle']);
-    Route::get('/calendar/callback', [CalendarController::class, 'handleGoogleCallback']);
-    Route::get('/calendar/events', [CalendarController::class, 'listEvents']);
+    // K places
+    Route::get('/places', [PlacesController::class, 'search']);
 
     //X user login (registration)
     Route::post('/register', RegisterController::class);
