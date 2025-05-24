@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Location API - RotaKnows</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="../styles/location.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Lora&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="logo">RotaKnows</div>
+      <nav>
+        <ul>
+          <li><a href="./news.html">News API</a></li>
+          <li><a href="./weather.html">Weather API</a></li>
+          <li><a href="./calendar.html">Calendar API</a></li>
+          <li><a href="./location.html">Location API</a></li>
+          <li><a href="./traveltime.html">TravelTime API</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <h1>Location API</h1>
+        <p>Pinpoint any destination with precise geolocation data.</p>
+        <a href="#location-section" class="cta-button">Try It Now</a>
+      </div>
+      <div class="hero-image">
+        <img src="../assets/logo/apiLogo/locationApI.png" alt="Location Map" class="float-image">
+      </div>
+    </div>
+  </section>
+
+  <section id="location-section" class="location-section">
+    <div class="container">
+      <h2>Find a Location</h2>
+      <form id="location-form" class="location-form">
+        <input type="text" id="location-input" placeholder="Enter address or coordinates" required>
+        <button type="submit" class="cta-button">Get Location</button>
+      </form>
+      <div id="location-result" class="location-result">
+        <!-- Location data will be displayed here -->
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>© 2025 RotaKnows. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="../js/location.js"></script>
+</body>
+</html>
