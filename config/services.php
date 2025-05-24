@@ -58,4 +58,9 @@ return [
         'base_url' => env('TOMTOM_BASE_URL', 'https://api.tomtom.com'),
     ],
 
+    'places' => [
+        'api_key' => env('FSQ_API_KEY'),
+        'base_url' => 'https://api.foursquare.com/v3/places/search',
+    ],
+
 ];
