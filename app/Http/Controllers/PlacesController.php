@@ -9,30 +9,19 @@ class PlacesController extends Controller
 {
     protected $placesService;
 
-    // Inject the PlacesService
     public function __construct(PlacesService $placesService)
     {
         $this->placesService = $placesService;
     }
 
-    // GET /api/places?lat=...&lon=...&query=...
     public function search(Request $request)
     {
-        $lat = $request->input('lat');
-        $lon = $request->input('lon');
-        $query = $request->input('query', '');
-        $radius = $request->input('radius', 1500);
-        $limit = $request->input('limit', 10);
+        $query = $request->input('query', 'mall');
+        $lat = $request->input('lat', '14.5995');    // default Manila latitude
+        $lng = $request->input('lon', '120.9842');   // note: use 'lon' as per your query param
 
-        if (!$lat || !$lon) {
-            return response()->json([
-                'error' => true,
-                'message' => 'Latitude and longitude are required.'
-            ], 400);
-        }
+        $results = $this->placesService->searchPlaces($query, $lat, $lng);
 
-        $places = $this->placesService->getNearbyPlaces($lat, $lon, $query, $radius, $limit);
-
-        return response()->json($places);
+        return response()->json($results);
     }
 }

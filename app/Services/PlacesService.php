@@ -14,32 +14,30 @@ class PlacesService
     public function __construct()
     {
         $this->client = new Client();
-        $this->apiKey = config('services.places.api_key');
-        $this->baseUrl = config('services.places.base_url');
+        $this->apiKey = config('services.foursquare.api_key');
+        $this->baseUrl = config('services.foursquare.base_url');
     }
 
-    public function getNearbyPlaces($lat, $lon, $query = '', $radius = 1500, $limit = 10)
+    public function searchPlaces($query = 'mall', $lat = '14.5995', $lng = '120.9842')
     {
         try {
-            $response = $this->client->get($this->baseUrl, [
+            $response = $this->client->get($this->baseUrl . '/search', [
                 'headers' => [
-                    'Accept' => 'application/json',
                     'Authorization' => $this->apiKey,
+                    'Accept' => 'application/json',
                 ],
                 'query' => [
-                    'll' => "$lat,$lon",
                     'query' => $query,
-                    'radius' => $radius,
-                    'limit' => $limit
-                ]
+                    'll' => $lat . ',' . $lng,  // lat,lng format
+                    'limit' => 10,
+                ],
             ]);
 
             return json_decode($response->getBody(), true);
-
         } catch (RequestException $e) {
             return [
                 'error' => true,
-                'message' => 'Failed to fetch Places data.'
+                'message' => 'Failed to fetch Places content: ' . $e->getMessage(),
             ];
         }
     }
