@@ -6,6 +6,7 @@ use App\Services\LocationIQService;
 use App\Services\TomTomService;
 use App\Services\WeatherService;
 use App\Services\GNewsService;
+use App\Services\PlacesService; 
 use Throwable; 
 
 class FareCalculationService
@@ -14,21 +15,24 @@ class FareCalculationService
     protected $tomTomService;
     protected $weatherService;
     protected $gnewsService;
+    protected $placesService; 
 
     public function __construct(
         LocationIQService $locationIQService,
         TomTomService $tomTomService,
         WeatherService $weatherService,
-        GNewsService $gnewsService
+        GNewsService $gnewsService,
+        PlacesService $placesService 
     ) {
         $this->locationIQService = $locationIQService;
         $this->tomTomService = $tomTomService;
         $this->weatherService = $weatherService;
         $this->gnewsService = $gnewsService;
+        $this->placesService = $placesService; 
     }
 
     /**
-     * Calculates all trip-related information (fare, distance, weather, news).
+     * Calculates all trip-related information (fare, distance, weather, news, and nearby places).
      *
      * @param string $originAddress
      * @param string $destinationAddress
@@ -89,9 +93,9 @@ class FareCalculationService
         $expectedFare = 0;
         $originLower = strtolower($originAddress);
         $destinationLower = strtolower($destinationAddress);
-        $jeepneyFare = 15;
-        $provincialBusFarePerKm = 3;
-        $minProvincialBusFare = 80;
+        $jeepneyFare = 10;
+        $provincialBusFarePerKm = 1;
+        $minProvincialBusFare = 70;
         $cdoKeywords = ['cagayan de oro', 'cdo', 'divisoria', 'carmen', 'agora', 'lapasan'];
 
         $isProvincialBusTrip = false;
@@ -123,6 +127,26 @@ class FareCalculationService
         $gnews = $this->gnewsService->searchNews($destinationAddress);
         $newsArticles = $gnews['articles'] ?? [];
 
+        // 6. Get Nearby Places using Foursquare (using your existing PlacesService)
+        $nearbyPlaces = [];
+        if (isset($destinationCoords['lat']) && isset($destinationCoords['lon'])) {
+            // You can customize the query, radius, and limit for nearby places
+            $placesResult = $this->placesService->getNearbyPlaces(
+                $destinationCoords['lat'],
+                $destinationCoords['lon'],
+                'restaurant', // Example query: search for 'restaurant'
+                1500,         // Radius in meters (e.g., 1.5 km)
+                5             // Limit to 5 results
+            );
+            
+            if (!isset($placesResult['error'])) {
+                // Foursquare returns results under 'results' key
+                $nearbyPlaces = $placesResult['results'] ?? [];
+            } else {
+                \Log::warning("Foursquare Places API returned an error: " . ($placesResult['message'] ?? 'Unknown error'));
+            }
+        }
+
         // Return all calculated data
         return [
             'origin' => $originAddress,
@@ -137,6 +161,7 @@ class FareCalculationService
                 'temperature_celsius' => $temperature,
             ],
             'news' => $newsArticles,
+            'nearby_places' => $nearbyPlaces, 
         ];
     }
 }
