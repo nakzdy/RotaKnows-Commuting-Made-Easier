@@ -3,75 +3,64 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class TomTomService
 {
-    protected $apiKey;
-    protected $baseUrl;
+    protected string $apiKey;
+    protected string $baseUrl;
 
     public function __construct()
     {
         $this->apiKey = config('services.tomtom.key');
-        // Now getting the base URL from the config file
-        $this->baseUrl = config('services.tomtom.base_url'); 
+        $this->baseUrl = rtrim(config('services.tomtom.base_url'), '/');
     }
 
-    /**
-     * Performs a TomTom Search API request.
-     * * @param string $query The search query (e.g., "coffee shop")
-     * @param array $params Additional parameters for the API request (e.g., ['lat' => 40.7128, 'lon' => -74.0060])
-     * @param string $endpoint The specific endpoint to hit (e.g., '/search/2/search/')
-     * @return array|null The API response data or null on failure.
-     */
-    public function search(string $query, array $params = [], string $endpoint = '/search/2/search/')
+    public function search(string $query, array $params = []): array
     {
-        // Concatenate base URL with the specific endpoint and query
+        if (empty($query)) {
+            return ['error' => 'Search query is required', 'status' => 400];
+        }
+
+        $endpoint = '/search/2/search/';
         $url = "{$this->baseUrl}{$endpoint}" . urlencode($query) . ".json";
 
         try {
-            $response = Http::get($url, array_merge([
-                'key' => $this->apiKey,
-            ], $params));
+            $response = Http::get($url, array_merge(['key' => $this->apiKey], $params));
 
             if ($response->successful()) {
                 return $response->json();
-            } else {
-                \Log::error("TomTom API Error ({$endpoint}): " . $response->status() . " - " . $response->body());
-                return null;
             }
+
+            Log::error("TomTom API Error (Search): HTTP {$response->status()} - {$response->body()}");
+            return ['error' => 'Failed to fetch search results', 'status' => $response->status()];
         } catch (\Exception $e) {
-            \Log::error("TomTom API Exception ({$endpoint}): " . $e->getMessage());
-            return null;
+            Log::error("TomTom API Exception (Search): {$e->getMessage()}");
+            return ['error' => 'Exception occurred during search', 'status' => 500];
         }
     }
 
-    /**
-     * Example for a different TomTom API, e.g., Routing.
-     * You would add more methods here for other TomTom APIs you need.
-     * * @param string $coordinates An array of origin and destination coordinates (e.g., ['40.7128,-74.0060:40.7580,-73.9855'])
-     * @param array $params Additional parameters for the API request
-     * @return array|null The API response data or null on failure.
-     */
-    public function calculateRoute(string $coordinates, array $params = [], string $endpoint = '/routing/1/calculateRoute/')
+    public function calculateRoute(string $coordinates, array $params = []): array
     {
-        // Concatenate base URL with the specific endpoint and coordinates
-        $url = "{$this->baseUrl}{$endpoint}" . $coordinates . "/json";
+        if (empty($coordinates)) {
+            return ['error' => 'Coordinates are required', 'status' => 400];
+        }
+
+        $endpoint = '/routing/1/calculateRoute/';
+        $url = "{$this->baseUrl}{$endpoint}{$coordinates}/json";
 
         try {
-            $response = Http::get($url, array_merge([
-                'key' => $this->apiKey,
-            ], $params));
+            $response = Http::get($url, array_merge(['key' => $this->apiKey], $params));
 
             if ($response->successful()) {
                 return $response->json();
-            } else {
-                \Log::error("TomTom API Error ({$endpoint}): " . $response->status() . " - " . $response->body());
-                return null;
             }
+
+            Log::error("TomTom API Error (Routing): HTTP {$response->status()} - {$response->body()}");
+            return ['error' => 'Failed to calculate route', 'status' => $response->status()];
         } catch (\Exception $e) {
-            \Log::error("TomTom API Exception ({$endpoint}): " . $e->getMessage());
-            return null;
+            Log::error("TomTom API Exception (Routing): {$e->getMessage()}");
+            return ['error' => 'Exception occurred during routing', 'status' => 500];
         }
     }
-
 }

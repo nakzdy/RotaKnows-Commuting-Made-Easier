@@ -18,4 +18,12 @@ class GNewsController extends Controller
     {
         return response()->json($this->gnews->searchNews($query));
     }
+
+    public function searchDirect($query = 'traffic Philippines')
+    {
+        $gnews = new GNewsService();
+        $result = $gnews->searchNews($query);
+
+        return response()->json($result);
+    }
 }

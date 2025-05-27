@@ -7,7 +7,7 @@ use App\Services\WeatherService;
 
 class WeatherController extends Controller
 {
-    protected $weatherService;
+    protected WeatherService $weatherService;
 
     public function __construct(WeatherService $weatherService)
     {
@@ -16,12 +16,8 @@ class WeatherController extends Controller
 
     public function index(Request $request)
     {
-        $city = $request->input('city', 'Cagayan de Oro City');
-        $weatherData = $this->weatherService->getWeather($city);
+        $weatherData = $this->weatherService->getWeather($request);
 
-        return response()->json([
-            'city' => $city,
-            'weather' => $weatherData
-        ]);
+        return response()->json($weatherData);
     }
 }

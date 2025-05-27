@@ -2,166 +2,67 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\FareCalculationService;
+use App\Services\FareService;
 use Illuminate\Http\Request;
-use Throwable;
+use Illuminate\Http\JsonResponse;
 
 class LocationFareController extends Controller
 {
-    protected $fareCalculationService;
+    protected $fareService;
 
-    public function __construct(FareCalculationService $fareCalculationService)
+    public function __construct(FareService $fareService)
     {
-        $this->fareCalculationService = $fareCalculationService;
+        $this->fareService = $fareService;
     }
 
     /**
-     * Get fare and info (GET request - your existing method)
-     * This is for ad-hoc calculation without saving to a database.
-     * Route: GET /api/fare-info?origin_address=...&destination_address=...
-     */
-    public function getFareAndInfo(Request $request)
-    {
-        $request->validate([
-            'origin_address' => 'required|string',
-            'destination_address' => 'required|string',
-        ]);
-
-        try {
-            $tripDetails = $this->fareCalculationService->calculateTripDetails(
-                $request->input('origin_address'),
-                $request->input('destination_address')
-            );
-
-            return response()->json($tripDetails);
-
-        } catch (Throwable $e) {
-            \Log::error("API integration error in LocationFareController (GET): " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            if (str_contains($e->getMessage(), 'Could not geocode')) {
-                return response()->json(['error' => $e->getMessage()], 400);
-            }
-            return response()->json(['error' => 'An unexpected error occurred. Please try again later.'], 500);
-        }
-    }
-
-    /**
-     * Calculate fare (POST request - your existing method)
-     * This is also for ad-hoc calculation, typically with data in the request body.
-     * Route: POST /api/calculate-fare (with JSON body)
-     */
-    public function calculateFare(Request $request)
-    {
-        $request->validate([
-            'origin_address' => 'required|string',
-            'destination_address' => 'required|string',
-        ]);
-
-        try {
-            $tripDetails = $this->fareCalculationService->calculateTripDetails(
-                $request->input('origin_address'),
-                $request->input('destination_address')
-            );
-
-            return response()->json($tripDetails);
-
-        } catch (Throwable $e) {
-            \Log::error("API integration error in LocationFareController (POST): " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            if (str_contains($e->getMessage(), 'Could not geocode')) {
-                return response()->json(['error' => $e->getMessage()], 400);
-            }
-            return response()->json(['error' => 'An unexpected error occurred. Please try again later.'], 500);
-        }
-    }
-
-    // --- NEW METHODS FOR PUT/PATCH/DELETE WITH ORIGIN/DESTINATION AS "IDENTIFIERS" ---
-
-    /**
-     * Handles PUT/PATCH requests to conceptually "update" a specific fare calculation.
-     * Since there's no database ID for a specific calculation, we use origin/destination
-     * from the request body as a conceptual identifier for what we're "updating."
+     * Get fare information.
      *
-     * This method would typically be used for updating a *persisted* trip, but here
-     * it simulates processing an update for a fare calculation request.
-     *
-     * Route: PUT/PATCH /api/fare-update
-     * Expected Body: { "origin_address": "...", "destination_address": "...", "new_fare_parameter": "..." }
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function updateFare(Request $request)
+    public function getFareAndInfo(): JsonResponse
     {
-        // For PUT/PATCH, the data to update would come from the request body
-        $request->validate([
-            'origin_address' => 'required|string',
-            'destination_address' => 'required|string',
-            'surcharge_amount' => 'numeric|min:0|nullable', // parameter you might "update"
-            'fare_modifier' => 'numeric|nullable', 
-        ]);
-
-        $originAddress = $request->input('origin_address');
-        $destinationAddress = $request->input('destination_address');
-        $surchargeAmount = $request->input('surcharge_amount', 0); // Default to 0 if not provided
-
-        
-
-        
         try {
-            $tripDetails = $this->fareCalculationService->calculateTripDetails(
-                $originAddress,
-                $destinationAddress
-            );
-
-            // Apply a conceptual update, e.g., add a surcharge
-            $updatedFare = $tripDetails['expected_fare'] + $surchargeAmount;
-            $tripDetails['expected_fare_with_surcharge'] = round($updatedFare, 0);
-
+            $fareInfo = $this->fareService->getFareInfo();
             return response()->json([
-                'message' => "Fare for '{$originAddress}' to '{$destinationAddress}' conceptually updated via " . $request->method() . ".",
-                'received_data' => $request->all(),
-                'calculated_details' => $tripDetails,
-                'note' => 'This is a placeholder. No actual fare calculations or settings are persisted without a database or config mechanism.'
-            ], 200); // 200 OK
-
-        } catch (Throwable $e) {
-            \Log::error("API integration error in LocationFareController (UPDATE): " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            if (str_contains($e->getMessage(), 'Could not geocode')) {
-                return response()->json(['error' => $e->getMessage()], 400);
-            }
-            return response()->json(['error' => 'An unexpected error occurred. Please try again later.'], 500);
+                'success' => true,
+                'data' => $fareInfo,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve fare information: ' . $e->getMessage(),
+            ], 500);
         }
     }
 
     /**
-     * Handles DELETE requests to conceptually "delete" or "reset" a fare calculation.
-     * Since there's no database ID, we use origin/destination from the request body
-     * or query parameters to identify what to "delete."
-     *
-     * Route: DELETE /api/fare-delete
-     * Expected Body: { "origin_address": "...", "destination_address": "..." }
+     * Update fare information.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function deleteFare(Request $request)
+    public function updateFare(Request $request): JsonResponse
     {
-        // For DELETE, data can come from body or query parameters.
-        // Using request()->all() for simplicity to get both.
-        $request->validate([
-            'origin_address' => 'required|string',
-            'destination_address' => 'required|string',
-        ]);
+        try {
+            // Validate request data
+            $validated = $request->validate([
+                'fare_id' => 'required|integer|exists:fares,id',
+                'amount' => 'required|numeric|min:0',
+                // Add other validation rules as needed
+            ]);
 
-        $originAddress = $request->input('origin_address');
-        $destinationAddress = $request->input('destination_address');
-
-        
-
-        \Log::info("DELETE request received for fare calculation: Origin '{$originAddress}', Destination '{$destinationAddress}'");
-
-        return response()->json([
-            'message' => "Fare calculation for '{$originAddress}' to '{$destinationAddress}' conceptually deleted/reset.",
-            'note' => 'This is a placeholder. No actual calculations or settings are deleted from persistence without a database or cache mechanism.'
-        ], 204); // 204 No Content 
+            $updatedFare = $this->fareService->updateFare($validated);
+            return response()->json([
+                'success' => true,
+                'data' => $updatedFare,
+                'message' => 'Fare updated successfully',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update fare: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

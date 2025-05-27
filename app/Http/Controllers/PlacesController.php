@@ -7,7 +7,7 @@ use App\Services\PlacesService;
 
 class PlacesController extends Controller
 {
-    protected $placesService;
+    protected PlacesService $placesService;
 
     public function __construct(PlacesService $placesService)
     {
@@ -16,11 +16,7 @@ class PlacesController extends Controller
 
     public function search(Request $request)
     {
-        $query = $request->input('query', 'mall');
-        $lat = $request->input('lat', '14.5995');    // default Manila latitude
-        $lng = $request->input('lon', '120.9842');   // note: use 'lon' as per your query param
-
-        $results = $this->placesService->searchPlaces($query, $lat, $lng);
+        $results = $this->placesService->searchPlaces($request);
 
         return response()->json($results);
     }

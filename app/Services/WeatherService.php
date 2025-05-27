@@ -5,18 +5,18 @@ namespace App\Services;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Exception;
+use Illuminate\Http\Request;
 
 class WeatherService
 {
-    protected $client;
-    protected $apiKey;
-    protected $baseUrl;
+    protected Client $client;
+    protected string $apiKey;
+    protected string $baseUrl;
 
     public function __construct()
     {
         $this->client = new Client();
 
-        // Use config helper to load from config/services.php, fallback to env if needed
         $this->apiKey = config('services.openweather.api_key') ?? env('OPENWEATHER_API_KEY');
         $this->baseUrl = config('services.openweather.base_url') ?? 'https://api.openweathermap.org/data/2.5/weather';
 
@@ -25,18 +25,29 @@ class WeatherService
         }
     }
 
-    public function getWeather(string $city)
+    /**
+     * Get weather data for the requested city.
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function getWeather(Request $request): array
     {
+        $city = $request->input('city', 'Cagayan de Oro City');
+
         try {
             $response = $this->client->get($this->baseUrl, [
                 'query' => [
                     'q' => $city,
                     'appid' => $this->apiKey,
-                    'units' => 'metric',  // Celsius
+                    'units' => 'metric', // Celsius
                 ],
             ]);
 
-            return json_decode($response->getBody(), true);
+            return [
+                'city' => $city,
+                'weather' => json_decode($response->getBody()->getContents(), true),
+            ];
 
         } catch (RequestException $e) {
             return [

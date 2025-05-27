@@ -4,12 +4,13 @@ namespace App\Services;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Http\Request;
 
 class PlacesService
 {
-    protected $client;
-    protected $apiKey;
-    protected $baseUrl;
+    protected Client $client;
+    protected string $apiKey;
+    protected string $baseUrl;
 
     public function __construct()
     {
@@ -18,8 +19,19 @@ class PlacesService
         $this->baseUrl = config('services.foursquare.base_url');
     }
 
-    public function searchPlaces($query = 'mall', $lat = '14.5995', $lng = '120.9842')
+    /**
+     * Search places using Foursquare Places API.
+     * Extracts input params from the request with defaults.
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function searchPlaces(Request $request): array
     {
+        $query = $request->input('query', 'mall');
+        $lat = $request->input('lat', '14.5995');    // Manila latitude
+        $lng = $request->input('lon', '120.9842');   // Manila longitude ('lon')
+
         try {
             $response = $this->client->get($this->baseUrl . '/search', [
                 'headers' => [
@@ -28,12 +40,12 @@ class PlacesService
                 ],
                 'query' => [
                     'query' => $query,
-                    'll' => $lat . ',' . $lng,  // lat,lng format
+                    'll' => "{$lat},{$lng}",
                     'limit' => 10,
                 ],
             ]);
 
-            return json_decode($response->getBody(), true);
+            return json_decode($response->getBody()->getContents(), true);
         } catch (RequestException $e) {
             return [
                 'error' => true,
