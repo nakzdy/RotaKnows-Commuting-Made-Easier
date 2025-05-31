@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\LocationFareController; 
+use App\Http\Controllers\FareController;
 use Illuminate\Http\Request;
 
 // XANNNN
@@ -38,13 +39,11 @@ Route::prefix('api')->group(function () {
     // Combined API for ad-hoc Fare and Info Calculation 
     Route::get('/fare-info', [LocationFareController::class, 'getFareAndInfo']);
     Route::post('/calculate-fare', [LocationFareController::class, 'calculateFare']);
-
     Route::put('/fare-update', [LocationFareController::class, 'updateFare']);
     Route::patch('/fare-update', [LocationFareController::class, 'updateFare']); 
-
     Route::delete('/fare-delete', [LocationFareController::class, 'deleteFare']);
 
-
+    Route::get('/fare', [FareController::class, 'calculate']);
 
     // Routes requiring API authentication (using Sanctum middleware)
     Route::middleware('auth:sanctum')->group(function () {
