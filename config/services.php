@@ -40,27 +40,24 @@ return [
         'base_url' => env('GNEWS_API_URL'),
     ],
 
-    // Add LocationIQ config here:
     'locationiq' => [
         'api_key' => env('LOCATIONIQ_API_KEY'),
-        'base_url' => 'https://us1.locationiq.com/v1', 
+        'base_url' => env('LOCATIONIQ_API_URL'),
     ],
 
-    // Add OpenWeather config here:
     'openweather' => [
         'api_key' => env('OPENWEATHER_API_KEY'),
-        'base_url' => env('OPENWEATHER_API_URL', 'https://api.openweathermap.org/data/2.5/weather'),
+        'base_url' => env('OPENWEATHER_API_URL'),
     ],
 
-    //TomTom
     'tomtom' => [
         'key' => env('TOMTOM_API_KEY'),
-        'base_url' => env('TOMTOM_BASE_URL', 'https://api.tomtom.com'),
+        'base_url' => env('TOMTOM_BASE_URL'),
     ],
 
     'foursquare' => [
         'api_key' => env('FSQ_API_KEY'),
-        'base_url' => 'https://api.foursquare.com/v3/places',
+        'base_url' => env('FSQ_API_URL'),
     ],
 
 ];
