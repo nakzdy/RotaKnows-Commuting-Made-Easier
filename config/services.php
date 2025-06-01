@@ -40,18 +40,15 @@ return [
         'base_url' => env('GNEWS_API_URL'),
     ],
 
-
     'locationiq' => [
         'api_key' => env('LOCATIONIQ_API_KEY'),
         'base_url' => env('LOCATIONIQ_API_URL'),
     ],
 
-
     'openweather' => [
         'api_key' => env('OPENWEATHER_API_KEY'),
         'base_url' => env('OPENWEATHER_API_URL'),
     ],
-
 
     'tomtom' => [
         'key' => env('TOMTOM_API_KEY'),
