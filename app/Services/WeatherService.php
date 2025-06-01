@@ -17,8 +17,8 @@ class WeatherService
     {
         $this->client = new Client();
 
-        $this->apiKey = config('services.openweather.api_key') ?? env('OPENWEATHER_API_KEY');
-        $this->baseUrl = config('services.openweather.base_url') ?? 'https://api.openweathermap.org/data/2.5/weather';
+        $this->apiKey = config('services.openweather.api_key');
+        $this->baseUrl = config('services.openweather.base_url');
 
         if (empty($this->apiKey)) {
             throw new Exception('OpenWeather API key is not set in the .env file.');

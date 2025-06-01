@@ -14,12 +14,10 @@ use Illuminate\Http\Request;
 
 // LocationIQ Routes for Geocoding
 Route::get('/geocode', [LocationController::class, 'geocode']);
-Route::post('/geocode', [LocationController::class, 'geocode']);
 Route::get('/geocode/{address}', [LocationController::class, 'geocode']);
 
 // OpenWeatherMap Routes for Weather information
 Route::get('/weather', [WeatherController::class, 'index']);
-Route::post('/weather', [WeatherController::class, 'index']);
 
 // GNews Routes for news articles
 Route::get('/gnews/{query?}', [GNewsController::class, 'search']);
@@ -36,7 +34,7 @@ Route::get('/tomtom/route', [MapController::class, 'getRoute'])->name('tomtom.ro
 
 // Combined API for ad-hoc Fare and Info Calculation 
 Route::get('/fare-info', [LocationFareController::class, 'getFareAndInfo']);
-Route::post('/calculate-fare', [LocationFareController::class, 'calculateFare']);
+Route::get('/calculate-fare', [LocationFareController::class, 'calculateFare']);
 Route::put('/fare-update', [LocationFareController::class, 'updateFare']);
 Route::patch('/fare-update', [LocationFareController::class, 'updateFare']);
 
