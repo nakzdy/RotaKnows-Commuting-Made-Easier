@@ -1,52 +1,21 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LocationController;
-use App\Http\Controllers\WeatherController;
-use App\Http\Controllers\PlacesController;
-use App\Http\Controllers\GNewsController;
-use App\Http\Controllers\Api\Auth\RegisterController;
-use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\MapController;
-use App\Http\Controllers\LocationFareController;
-use App\Http\Controllers\FareController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
-// LocationIQ Routes for Geocoding
-Route::get('/geocode', [LocationController::class, 'geocode']);
-Route::get('/geocode/{address}', [LocationController::class, 'geocode']);
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
 
-// OpenWeatherMap Routes for Weather information
-Route::get('/weather', [WeatherController::class, 'index']);
-
-// GNews Routes for news articles
-Route::get('/gnews/{query?}', [GNewsController::class, 'search']);
-
-// Foursquare Places Routes for searching nearby places
-Route::get('/places', [PlacesController::class, 'search']);
-
-// User Registration (Authentication)
-Route::post('/register', RegisterController::class);
-
-// TomTom Routes for map search and route calculation
-Route::get('/tomtom/search', [MapController::class, 'searchPlaces'])->name('tomtom.search');
-Route::get('/tomtom/route', [MapController::class, 'getRoute'])->name('tomtom.route');
-
-// Combined API for ad-hoc Fare and Info Calculation 
-Route::get('/fare-info', [LocationFareController::class, 'getFareAndInfo']);
-Route::get('/calculate-fare', [LocationFareController::class, 'calculateFare']);
-Route::put('/fare-update', [LocationFareController::class, 'updateFare']);
-Route::patch('/fare-update', [LocationFareController::class, 'updateFare']);
-
-// Routes requiring API authentication (using Sanctum middleware)
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-
-    Route::get('/protected-resource', function () {
-        return response()->json(['data' => 'This is protected data.']);
-    });
-
-    Route::apiResource('users', UserController::class);
+// You can keep the default Laravel API user route if you wish,
+// or remove it if you are managing users through the web.php file's API group.
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
 });

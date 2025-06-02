@@ -9,7 +9,7 @@ use App\Services\GNewsService;
 use App\Services\PlacesService; 
 use Throwable; 
 
-class FareCalculationService
+class FareService
 {
     protected $locationIQService;
     protected $tomTomService;

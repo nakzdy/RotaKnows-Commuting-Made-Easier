@@ -1,53 +1,41 @@
-version: '3.8'
-
 services:
-  # Laravel application service with Apache
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: laravel_app_new
-    restart: unless-stopped
-    volumes:
-      - .:/var/www/html # Keep this mount for your application code
-      # REMOVE THIS LINE: - ./apache.conf:/etc/apache2/sites-available/laravel.conf
+    container_name: laravel_app
     ports:
-      - "80:80"
+      - "8000:80"  
+      - "2222:22"
+    volumes:
+      - .:/var/www/html # Changed from ./laravel to .
+      - ./php.ini:/usr/local/etc/php/php.ini
+      - ./apache.conf:/etc/apache2/sites-enabled/000-default.conf  
+    working_dir: /var/www/html
     environment:
-      APP_ENV: ${APP_ENV}
-      APP_DEBUG: ${APP_DEBUG}
-      APP_KEY: ${APP_KEY}
-      DB_CONNECTION: mysql
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-    networks:
-      - laravel_network
-
-  # MySQL database service (no changes needed here)
+      APACHE_DOCUMENT_ROOT: /var/www/html/public
+    depends_on:
+      - db
   db:
     image: mysql:8.0
-    container_name: laravel_mysql
-    restart: unless-stopped
+    container_name: mysql_db
     ports:
-      - "3307:3306"
+      - "2206:3306"
     environment:
-      MYSQL_DATABASE: laravel_db
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_USER: users
+      MYSQL_DATABASE: laravel_db
+      MYSQL_USER: user
       MYSQL_PASSWORD: userpassword
     volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - laravel_network
+      - dbdata:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: laravel_phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: rootpassword
 
-# Define Docker volumes for data persistence
 volumes:
-  db_data:
-
-# Define Docker networks for inter-container communication
-networks:
-  laravel_network:
-    driver: bridge
+  dbdata:
