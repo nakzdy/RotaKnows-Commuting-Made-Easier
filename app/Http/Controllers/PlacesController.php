@@ -36,7 +36,7 @@ class PlacesController extends Controller
                 'limit' => 'nullable|integer|min:1|max:50',
             ]);
 
-            // Get latitude and longitude from request query parameters (now required by validation)
+            // Get latitude and longitude from request query parameters
             $lat = (float) $request->query('lat');
             $lon = (float) $request->query('lon');
 
@@ -48,7 +48,7 @@ class PlacesController extends Controller
 
             // Log the parameters being sent to the service
             Log::info('PlacesController: Calling getNearbyPlaces with:', [
-                'query' => $searchQuery, // This variable is now defined
+                'query' => $searchQuery, 
                 'lat' => $lat,
                 'lon' => $lon,
                 'radius' => $radius,
@@ -59,7 +59,7 @@ class PlacesController extends Controller
             $results = $this->placesService->getNearbyPlaces(
                 $lat,
                 $lon,
-                $searchQuery, // This variable is now defined
+                $searchQuery, 
                 $radius,
                 $limit
             );

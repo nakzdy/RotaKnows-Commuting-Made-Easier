@@ -45,7 +45,6 @@ class FareService
      */
     public function calculateTripDetails(array $data): array
     {
-        // 1. Validate incoming data
         $validator = Validator::make($data, [
             'originAddress' => 'required|string|min:3',
             'destinationAddress' => 'required|string|min:3',
@@ -59,10 +58,9 @@ class FareService
 
         $originAddress = $data['originAddress'];
         $destinationAddress = $data['destinationAddress'];
-        $vehicleType = strtolower($data['vehicle_type']); // Get and normalize vehicle type
+        $vehicleType = strtolower($data['vehicle_type']);
         $foursquareQuery = $data['foursquare_query'] ?? 'restaurant';
 
-        // 2. Geocode Origin and Destination using LocationIQ
         try {
             $originGeocode = $this->locationIQService->geocode($originAddress);
             $destinationGeocode = $this->locationIQService->geocode($destinationAddress);
@@ -89,14 +87,13 @@ class FareService
             'lon' => $destinationGeocode['longitude'],
         ];
 
-        // 3. Get Route and Distance using TomTom (or fallback to LocationIQ)
         $distanceInMeters = 0;
         $travelTimeInSeconds = 0;
         try {
             $tomTomCoordinatesString = "{$originCoords['lat']},{$originCoords['lon']}:{$destinationCoords['lat']},{$destinationCoords['lon']}";
             $tomTomRoute = $this->tomTomService->calculateRoute(
                 $tomTomCoordinatesString,
-                ['travelMode' => 'car', 'traffic' => 'true', 'departAt' => 'now'] // Assuming 'car' for general routing
+                ['travelMode' => 'car', 'traffic' => 'true', 'departAt' => 'now']
             );
 
             if (isset($tomTomRoute['routes'][0]['summary'])) {
@@ -121,22 +118,19 @@ class FareService
         $distanceInKm = $distanceInMeters / 1000;
         $travelTimeInMinutes = round($travelTimeInSeconds / 60);
 
-        // 4. Calculate Fare based on Vehicle Type and Distance (your heuristic logic)
         $expectedFare = 0;
         $originLower = strtolower($originAddress);
         $destinationLower = strtolower($destinationAddress);
 
-        // Define base rates (adjust these as needed for your specific context)
-        $jeepneyBaseFare = 10; // Example local jeepney base fare
-        $jeepneyPerKmRate = 1.5; // Example jeepney per km rate for longer trips
-        $busBaseFare = 20; // Example local bus base fare (if applicable)
-        $provincialBusPerKmRate = 1; // Example provincial bus per km rate
-        $minProvincialBusFare = 70; // Minimum fare for provincial bus trips
-        $taxiFlagDown = 40; // Example taxi flag-down
-        $taxiPerKmRate = 13.5; // Example taxi per km rate
+        $jeepneyBaseFare = 10;
+        $jeepneyPerKmRate = 1.5;
+        $busBaseFare = 20;
+        $provincialBusPerKmRate = 1;
+        $minProvincialBusFare = 70;
+        $taxiFlagDown = 40;
+        $taxiPerKmRate = 13.5;
 
-        // Keywords to identify provincial destinations for specific bus logic
-        $provincialKeywords = ['balingasag', 'gingoog', 'claveria', 'iligan', 'butuan']; // Add more as needed
+        $provincialKeywords = ['balingasag', 'gingoog', 'claveria', 'iligan', 'butuan'];
         $isGeographicallyProvincial = false;
         foreach ($provincialKeywords as $keyword) {
             if (str_contains($destinationLower, $keyword)) {
@@ -144,63 +138,51 @@ class FareService
                 break;
             }
         }
-        // Also consider distance for provincial trips
-        if ($distanceInKm > 30) { // Arbitrary threshold for provincial distance
-             $isGeographicallyProvincial = true;
-        }
 
+        if ($distanceInKm > 30) {
+            $isGeographicallyProvincial = true;
+        }
 
         switch ($vehicleType) {
             case 'jeepney':
                 if ($isGeographicallyProvincial) {
-                    // For provincial jeepney trips, apply a higher per-km rate or a flat minimum
-                    $expectedFare = max($jeepneyBaseFare, $distanceInKm * $jeepneyPerKmRate * 1.5); // Example: 1.5x regular jeepney rate
-                    // Could also combine with provincial bus minimum if relevant
+                    $expectedFare = max($jeepneyBaseFare, $distanceInKm * $jeepneyPerKmRate * 1.5);
                     $expectedFare = max($expectedFare, $minProvincialBusFare);
                 } else {
-                    // Local jeepney fare (e.g., within CDO)
-                    $expectedFare = $jeepneyBaseFare * 2; // Simple heuristic for short trips, adjust as needed
+                    $expectedFare = $jeepneyBaseFare * 2;
                 }
                 break;
 
             case 'bus':
-                // Bus fare logic, primarily for provincial routes
                 if ($isGeographicallyProvincial) {
                     $calculatedProvincialFare = max($minProvincialBusFare, $distanceInKm * $provincialBusPerKmRate);
-                    // Add a hypothetical first leg local fare if originating within CDO to a bus terminal
                     $firstLegLocalFare = 0;
                     $cdoKeywords = ['cagayan de oro', 'cdo', 'divisoria', 'carmen', 'agora', 'lapasan'];
                     foreach ($cdoKeywords as $keyword) {
                         if (str_contains($originLower, $keyword)) {
-                            $firstLegLocalFare = $jeepneyBaseFare; // Assuming local leg to terminal is jeepney
+                            $firstLegLocalFare = $jeepneyBaseFare;
                             break;
                         }
                     }
                     $expectedFare = $firstLegLocalFare + $calculatedProvincialFare;
                 } else {
-                    // If bus is chosen for a non-provincial (local) route
-                    // This scenario might not typically happen with "provincial bus" type vehicles
-                    // You might need a specific local bus fare or consider it an unsupported combination
                     Log::warning("FareService: Bus selected for non-provincial trip ('{$originAddress}' to '{$destinationAddress}'). Using basic fare.");
-                    $expectedFare = $busBaseFare + ($distanceInKm * 0.5); // Example basic local bus fare
+                    $expectedFare = $busBaseFare + ($distanceInKm * 0.5);
                 }
                 break;
 
             case 'taxi':
-            case 'private_car': // Assuming 'private_car' uses similar calculation to taxi for now
+            case 'private_car':
                 $expectedFare = $taxiFlagDown + ($distanceInKm * $taxiPerKmRate);
-                // Add considerations for traffic, time, surcharges if applicable
                 break;
 
             default:
                 Log::warning("FareService: Unsupported vehicle type '{$vehicleType}' provided. Using default jeepney fare.");
-                $expectedFare = $jeepneyBaseFare * 2; // Default to local jeepney fare
+                $expectedFare = $jeepneyBaseFare * 2;
                 break;
         }
         $expectedFare = round($expectedFare, 0);
 
-
-        // 5. Get Weather at Destination
         $weatherDescription = 'N/A';
         $temperature = 'N/A';
         try {
@@ -214,25 +196,18 @@ class FareService
                 $weatherDescription = $openWeatherMapData['weather'][0]['description'] ?? 'N/A';
                 $temperature = $openWeatherMapData['main']['temp'] ?? 'N/A';
             }
-
         } catch (\Exception $e) {
             Log::warning("FareService (Weather): Could not get weather for {$destinationAddress} due to an exception: " . $e->getMessage());
-            // Continue even if weather fails
         }
 
-
-        // 6. Get News related to Destination
         $newsArticles = [];
         try {
             $gnews = $this->gnewsService->searchNews($destinationAddress);
             $newsArticles = $gnews['articles'] ?? [];
         } catch (\Exception $e) {
             Log::warning("FareService (GNews): Could not get news for {$destinationAddress}: " . $e->getMessage());
-            // Continue even if news fails
         }
 
-
-        // 7. Get Nearby Places using Foursquare
         $nearbyPlaces = [];
         try {
             if (isset($destinationCoords['lat']) && isset($destinationCoords['lon'])) {
@@ -240,8 +215,8 @@ class FareService
                     $destinationCoords['lat'],
                     $destinationCoords['lon'],
                     $foursquareQuery,
-                    1500, // Radius in meters
-                    5    // Limit of results
+                    1500,
+                    5
                 );
 
                 if (!isset($placesResult['error'])) {
@@ -252,11 +227,8 @@ class FareService
             }
         } catch (\Exception $e) {
             Log::warning("FareService (Foursquare Places): " . $e->getMessage());
-            // Continue even if places fails
         }
 
-
-        // Return all calculated data
         return [
             'origin' => $originAddress,
             'destination' => $destinationAddress,
@@ -271,7 +243,7 @@ class FareService
             ],
             'news' => $newsArticles,
             'nearby_places' => $nearbyPlaces,
-            'vehicle_type' => $vehicleType, // Include vehicle type in response
+            'vehicle_type' => $vehicleType,
         ];
     }
 
@@ -284,8 +256,6 @@ class FareService
      */
     public function createFare(array $data): Fare
     {
-        // Define validation rules for creating a fare.
-        // ADDED/MODIFIED: base_fare and distance_rate_per_km are now required.
         $validator = Validator::make($data, [
             'origin_address' => 'required|string|max:255',
             'destination_address' => 'required|string|max:255',
@@ -293,17 +263,15 @@ class FareService
             'distance_km' => 'required|numeric|min:0',
             'travel_time_minutes' => 'required|integer|min:0',
             'expected_fare' => 'required|numeric|min:0',
-            'base_fare' => 'required|numeric|min:0', // <--- ADDED THIS LINE
-            'distance_rate_per_km' => 'required|numeric|min:0', // <--- ADDED THIS LINE
-            // Add any other fields from your 'fares' table you want to save
+            'base_fare' => 'required|numeric|min:0',
+            'distance_rate_per_km' => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
 
-        // Create and save the new fare record
-        $fare = Fare::create($data); // This assumes your Fare model has fillable properties set
+        $fare = Fare::create($data);
 
         return $fare;
     }
@@ -318,15 +286,13 @@ class FareService
      */
     public function updateFare(array $data): array
     {
-        // Implement validation for updateFare here, matching your table columns
         $validator = Validator::make($data, [
-            'fare_id' => 'required|integer|exists:fares,id', // 'exists:fares,id' checks if ID exists in 'fares' table
+            'fare_id' => 'required|integer|exists:fares,id',
             'vehicle_type' => 'nullable|string|max:50',
             'base_fare' => 'nullable|numeric|min:0',
             'distance_rate_per_km' => 'nullable|numeric|min:0',
             'origin_address' => 'nullable|string|max:255',
             'destination_address' => 'nullable|string|max:255',
-            // ADDED/MODIFIED: Allow these to be updated as well
             'distance_km' => 'nullable|numeric|min:0',
             'travel_time_minutes' => 'nullable|integer|min:0',
             'expected_fare' => 'nullable|numeric|min:0',
@@ -339,7 +305,6 @@ class FareService
         try {
             $fare = Fare::findOrFail($data['fare_id']);
 
-            // Update only the fields that are present in the request data
             if (isset($data['vehicle_type'])) {
                 $fare->vehicle_type = $data['vehicle_type'];
             }
@@ -355,7 +320,6 @@ class FareService
             if (isset($data['destination_address'])) {
                 $fare->destination_address = $data['destination_address'];
             }
-            // ADDED: Explicitly update these fields if present in the data
             if (isset($data['distance_km'])) {
                 $fare->distance_km = $data['distance_km'];
             }
@@ -369,7 +333,6 @@ class FareService
             $fare->save();
 
             return $fare->toArray();
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::warning("FareService: Fare ID {$data['fare_id']} not found for update.");
             return ['error' => 'Fare not found.', 'status' => 404];
@@ -388,14 +351,11 @@ class FareService
     public function deleteFare(int $id): bool
     {
         try {
-            // Find the fare by ID and delete it
             $deleted = Fare::destroy($id);
             return (bool) $deleted;
-
         } catch (\Exception $e) {
             Log::error("FareService: Failed to delete fare ID {$id}: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             return false;
         }
     }
-
 }

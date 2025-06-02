@@ -6,7 +6,7 @@ use App\Services\FareService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Log; // Ensure this is imported
+use Illuminate\Support\Facades\Log; 
 
 class LocationFareController extends Controller
 {
@@ -107,9 +107,9 @@ class LocationFareController extends Controller
             // Merge the route parameter into the request data for validation in service
             $data = array_merge($request->all(), ['fare_id' => $id]);
 
-            // === START OF THE ONLY ADDED LINE IN THIS FILE FOR DEBUGGING ===
+
             Log::info('Data received in LocationFareController for update:', $data);
-            // === END OF ADDED LINE ===
+
 
             $updatedFare = $this->fareService->updateFare($data);
 

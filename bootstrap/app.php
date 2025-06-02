@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
-            'api/*', // Allow all API routes
+            'api/*', 
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

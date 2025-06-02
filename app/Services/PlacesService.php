@@ -76,7 +76,7 @@ class PlacesService
             }
 
             if ($response->getStatusCode() === 200) {
-                $data = json_decode($responseBody, true); // Use the already read body
+                $data = json_decode($responseBody, true); 
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     Log::error("PlacesService: Failed to decode Foursquare JSON response for query '{$query}' at ({$lat},{$lon}).");
                     return ['error' => 'Invalid JSON response from Foursquare API.', 'status' => 500];
