@@ -5,7 +5,7 @@ namespace App\Services;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Exception;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log; 
 
 class WeatherService
 {
@@ -18,22 +18,29 @@ class WeatherService
         $this->client = new Client();
 
         $this->apiKey = config('services.openweather.api_key');
-        $this->baseUrl = config('services.openweather.base_url');
+        $this->baseUrl = config('services.openweather.base_url'); 
 
         if (empty($this->apiKey)) {
-            throw new Exception('OpenWeather API key is not set in the .env file.');
+            Log::error('OpenWeather API key is not set in the .env file or config/services.php.');
+            throw new Exception('OpenWeather API key is not configured.');
         }
     }
 
     /**
-     * Get weather data for the requested city.
+     * Get weather data for the specified city/address.
      *
-     * @param Request $request
-     * @return array
+     * @param string $city The city name or address for which to get weather.
+     * @return array Returns weather data or an error array.
      */
-    public function getWeather(Request $request): array
+    public function getWeather(string $city): array // <--- CHANGED THIS LINE
     {
-        $city = $request->input('city', 'Cagayan de Oro City');
+        if (empty($city)) {
+            Log::warning("WeatherService: Attempted to get weather for an empty city string.");
+            return [
+                'error' => true,
+                'message' => 'City name cannot be empty for weather lookup.',
+            ];
+        }
 
         try {
             $response = $this->client->get($this->baseUrl, [
@@ -44,15 +51,40 @@ class WeatherService
                 ],
             ]);
 
-            return [
-                'city' => $city,
-                'weather' => json_decode($response->getBody()->getContents(), true),
-            ];
+            if ($response->getStatusCode() === 200) {
+                $weatherData = json_decode($response->getBody()->getContents(), true);
+                return [
+                    'city' => $city,
+                    'weather' => $weatherData, // Return the full weather data
+                ];
+            } else {
+                // Handle non-200 responses from OpenWeatherMap API
+                Log::error("WeatherService: OpenWeatherMap API returned status {$response->getStatusCode()} for city '{$city}'. Response: " . $response->getBody()->getContents());
+                 return [
+                    'error' => true,
+                    'message' => 'Failed to fetch weather data from OpenWeatherMap API. Status: ' . $response->getStatusCode(),
+                    'api_response' => $response->getBody()->getContents() // Include API response for debugging
+                ];
+            }
+
 
         } catch (RequestException $e) {
+            // This catches Guzzle HTTP client errors (network issues, API errors handled by Guzzle)
+            $statusCode = $e->hasResponse() ? $e->getResponse()->getStatusCode() : 500;
+            $errorMessage = $e->hasResponse() ? $e->getResponse()->getBody()->getContents() : $e->getMessage();
+
+            Log::error("WeatherService: Guzzle RequestException for city '{$city}': " . $errorMessage . "\n" . $e->getTraceAsString());
+
             return [
                 'error' => true,
-                'message' => 'Unable to fetch weather data. Please check the city name or try again later.',
+                'message' => "Unable to fetch weather data: " . ($e->hasResponse() ? 'API error' : 'Network error') . ". Status: {$statusCode}. " . $e->getMessage(),
+            ];
+        } catch (Exception $e) {
+            // Catch any other general exceptions
+            Log::error("WeatherService: General Exception for city '{$city}': " . $e->getMessage() . "\n" . $e->getTraceAsString());
+            return [
+                'error' => true,
+                'message' => 'An unexpected error occurred while processing weather data: ' . $e->getMessage(),
             ];
         }
     }

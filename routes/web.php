@@ -54,7 +54,9 @@ Route::prefix('api')->group(function () {
 
     // --- Fare & Info Calculation Routes (Handled by LocationFareController) ---
     Route::get('/fare-info', [LocationFareController::class, 'getFareAndInfo'])->name('fare.info');
-    Route::get('/calculate-fare', [LocationFareController::class, 'calculateFare'])->name('fare.calculate');
+
+    // Route to store a new fare (newly added)
+    Route::post('/fare', [LocationFareController::class, 'storeFare'])->name('fare.store');
 
     // RESTful update/delete for fare resources using an ID
     Route::put('/fare/{id}', [LocationFareController::class, 'updateFare'])->name('fare.update');
